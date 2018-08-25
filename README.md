@@ -1,70 +1,47 @@
-# Calling Tracking Demo using Node and the Nexmo Voice API
+# Calling Tracking Demo with Node
+We can use unique identifiers to measure the impact of past decisions and fine-tune future ones. You can track the phone numbers that are used for campaigns on television, radio, magazine, print or online advertising, find the most popular ones for improving future campaigns.
 
-This app used the Nexmo Voice API to demonstrate how a call tracking application could be built.
-
-* The call is tracked
-* Incoming calls are proxied to a destination number
+## Use case
+* Use different numbers for different campaigns (TV, Radio, Print, Online, etc.)
+* Forward the call to these numbers to the same call center numbers
+* Track the number of calls through different campaign associated numbers
+* Use the collected data to improve business decision making for future campaigns
 
 ## Prerequisites
+* Prepare some Nexmo Virtual Number
+* Have [Nexmo CLI](https://github.com/Nexmo/nexmo-cli/) installed
+* Use Heroku to publish local web server
 
-You will need:
-
-* At least one Nexmo Virtual Number (Phone Number)
-* The [Nexmo CLI](https://github.com/Nexmo/nexmo-cli/) installed
-* Somewhere to host this web app, Heroku or Your Local Machine with ngrok both work well
-
-## Installation
-
+## Step by Step Guide
+1. Reuse the code
 ```sh
 git clone https://github.com/nexmo/node-call-tracking.git
 cd node-call-tracking
+mv example.env .env
 npm install
 ```
-
-## Setup
-
-Create the nexmo application, using the [Nexmo CLI](https://github.com/nexmo/nexmo-cli) and take note of the application universally unique identifier (UUID):
+2. Publish local port and note down returned link [ngrok_url]
+```sh
+./ngrok http 5000
+```
+3. Create the nexmo application and note down returned app ID [nexmo_app]
 
 ```sh
-nexmo app:create demo-app --keyfile private.key http://example.com http://example.com
+nexmo app:create "call-track" [ngrok_url]/answer [ngrok_url]/event --keyfile private.key
 ```
-
-Rename the config file:
-
+4. Buy numbers that will be tracked and note down returned number [nexmo_num]
 ```sh
-mv example.env .env
+nexmo number:buy --country_code US
 ```
-
-Fill in the values in `.env` as appropriate.
-
-Buy numbers for calls that you would like to track. The following example buys the first available number in a given country by country code.
-
+5. Link the number to the app
 ```sh
-nexmo number:buy --country_code [YOUR_COUNTRY_CODE]
+nexmo link:app [nexmo_num] [nexmo_app]
 ```
-
-Link the virtual numbers to the app id with the Nexmo CLI:
-
+6. Fill the .env file with proper variable values
 ```sh
-nexmo link:app [NUMBER] [app-id]
+PROXY_TO_NUMBER=[your_real_call_center_number]
 ```
-
-[Update the app](https://github.com/Nexmo/nexmo-cli#update-an-application) to set the webhook urls to be your server instead of the example.com placeholders used at creation.
-
-```sh
-nexmo app:update [app-id] demo-app [your url]/answer [your url]/event
-```
-
-We recommend using [ngrok](https://ngrok.com/) to tunnel through to your locally running application. In which case the command above is likely to be something similar to:
-
-```sh
-nexmo app:update [app-id] demo-app https://___.ngrok.io/answer https://___.ngrok.io/event
-```
-
-Where `___` should be replaced with the `ngrok.io` subdomain you are assigned.
-
-### Running the App
-
+7. Run the App and
 ```sh
 npm start
 ```
